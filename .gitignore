@@ -1,0 +1,13 @@
+# Local credentials: never commit
+.env
+.env.*
+!.env.example
+
+# Build output
+/mixcloud-cli
+/dist/
+*.test
+coverage.out
+
+# Local record of uploads made by the CLI (may contain private show keys)
+.mixcloud-uploads.json
