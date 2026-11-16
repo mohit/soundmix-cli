@@ -7,9 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"text/tabwriter"
 	"time"
@@ -17,6 +15,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 
+	"github.com/mohit/soundmix-cli/media"
 	"github.com/mohit/soundmix-cli/mixcloud"
 )
 
@@ -126,7 +125,7 @@ checked: public, unlisted (link only), draft or scheduled.`,
 			fmt.Fprintln(tw, "KEY\tNAME\tSTATUS\tPUBLISHED\tLENGTH\tPLAYS")
 			for _, s := range shows {
 				fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\t%d\n", s.Key, truncate(s.Name, 50), s.Status,
-					publishedDate(s.Cloudcast), mixcloud.FormatDuration(s.Duration()), s.PlayCount)
+					publishedDate(s.Cloudcast), media.FormatDuration(s.Duration()), s.PlayCount)
 			}
 			return tw.Flush()
 		},
@@ -187,7 +186,7 @@ func printShow(g *globalOptions, cc *mixcloud.Cloudcast, st showStatus) {
 	if cc.EverPublished() {
 		published = cc.CreatedTime.Format(time.RFC3339)
 	}
-	g.printf("  Published: %s\n  Length:    %s\n", published, mixcloud.FormatDuration(cc.Duration()))
+	g.printf("  Published: %s\n  Length:    %s\n", published, media.FormatDuration(cc.Duration()))
 	g.printf("  Plays:     %d   Favorites: %d   Reposts: %d   Comments: %d\n",
 		cc.PlayCount, cc.FavoriteCount, cc.RepostCount, cc.CommentCount)
 	if len(cc.Tags) > 0 {
@@ -209,7 +208,7 @@ func printShow(g *globalOptions, cc *mixcloud.Cloudcast, st showStatus) {
 			sec := s.ToSection()
 			ts := "     "
 			if sec.StartTime != nil {
-				ts = mixcloud.FormatDuration(*sec.StartTime)
+				ts = media.FormatDuration(*sec.StartTime)
 			}
 			if sec.IsChapter() {
 				g.printf("  %8s  %s\n", ts, sec.Chapter)
@@ -295,27 +294,27 @@ func (m *metadataFlags) readDescription(stdin io.Reader) (string, bool, error) {
 	return m.description, m.description != "", nil
 }
 
-func (m *metadataFlags) readSections(stdin io.Reader) ([]mixcloud.Section, error) {
-	var out []mixcloud.Section
+func (m *metadataFlags) readSections(stdin io.Reader) ([]media.Section, error) {
+	var out []media.Section
 	if m.tracklist != "" {
 		data, err := readFileOrStdin(m.tracklist, stdin)
 		if err != nil {
 			return nil, err
 		}
-		secs, err := mixcloud.ParseTracklist(strings.NewReader(string(data)))
+		secs, err := media.ParseTracklist(strings.NewReader(string(data)))
 		if err != nil {
 			return nil, usageError{err}
 		}
 		out = append(out, secs...)
 	}
 	for _, line := range m.sections {
-		s, err := mixcloud.ParseSection(line)
+		s, err := media.ParseSection(line)
 		if err != nil {
 			return nil, usageError{fmt.Errorf("--section: %w", err)}
 		}
 		out = append(out, s)
 	}
-	mixcloud.SortSections(out)
+	media.SortSections(out)
 	return out, nil
 }
 
@@ -413,7 +412,7 @@ Use --dry-run to run the checks without uploading.`,
 			}
 
 			if !chk.skipLength {
-				d, err := audioDuration(args[0])
+				d, err := media.Duration(args[0])
 				if err != nil {
 					return usagef("can't determine the audio length of %s (%v); install ffprobe or pass --skip-length-check", args[0], err)
 				}
@@ -447,7 +446,7 @@ Use --dry-run to run the checks without uploading.`,
 				}
 				g.printf("Dry run: %q passed all checks and is ready to upload.\n", req.Name)
 				if d, ok := plan["duration_seconds"].(int); ok {
-					g.printf("  Length: %s\n", mixcloud.FormatDuration(time.Duration(d)*time.Second))
+					g.printf("  Length: %s\n", media.FormatDuration(time.Duration(d)*time.Second))
 				}
 				if q, ok := plan["quota"].(map[string]any); ok {
 					g.printf("  Quota:  %v published, %v remaining\n", q["published"], q["remaining"])
@@ -845,43 +844,6 @@ func printResult(g *globalOptions, verb string, res *mixcloud.UploadResult) erro
 	return nil
 }
 
-// audioDuration reads an MP3's length directly, falling back to ffprobe for
-// other formats.
-func audioDuration(path string) (time.Duration, error) {
-	if strings.EqualFold(filepath.Ext(path), ".mp3") {
-		f, err := os.Open(path)
-		if err != nil {
-			return 0, err
-		}
-		defer f.Close()
-		st, err := f.Stat()
-		if err != nil {
-			return 0, err
-		}
-		if d, err := mixcloud.MP3Duration(f, st.Size()); err == nil {
-			return d, nil
-		}
-	}
-	return ffprobeDuration(path)
-}
-
-func ffprobeDuration(path string) (time.Duration, error) {
-	bin, err := exec.LookPath("ffprobe")
-	if err != nil {
-		return 0, errors.New("not an MP3 and ffprobe is not installed")
-	}
-	out, err := exec.Command(bin, "-v", "error", "-show_entries", "format=duration",
-		"-of", "default=noprint_wrappers=1:nokey=1", "--", path).Output()
-	if err != nil {
-		return 0, fmt.Errorf("ffprobe: %w", err)
-	}
-	secs, err := strconv.ParseFloat(strings.TrimSpace(string(out)), 64)
-	if err != nil {
-		return 0, fmt.Errorf("ffprobe returned %q", strings.TrimSpace(string(out)))
-	}
-	return time.Duration(secs * float64(time.Second)), nil
-}
-
 func parsePublishDate(s string) (time.Time, error) {
 	if t, err := time.Parse(time.RFC3339, s); err == nil {
 		return t.UTC(), nil
@@ -930,7 +892,7 @@ func newProgress(w io.Writer, label string) func(sent, total int64) {
 		elapsed := now.Sub(start).Seconds()
 		rate := ""
 		if elapsed > 0 {
-			rate = mixcloud.HumanBytes(int64(float64(sent)/elapsed)) + "/s"
+			rate = media.HumanBytes(int64(float64(sent)/elapsed)) + "/s"
 		}
 		pct := 0.0
 		if total > 0 {
@@ -941,12 +903,12 @@ func newProgress(w io.Writer, label string) func(sent, total int64) {
 				return
 			}
 			last = now
-			fmt.Fprintf(w, "\r%s: %5.1f%% (%s / %s) %s   ", label, pct, mixcloud.HumanBytes(sent), mixcloud.HumanBytes(total), rate)
+			fmt.Fprintf(w, "\r%s: %5.1f%% (%s / %s) %s   ", label, pct, media.HumanBytes(sent), media.HumanBytes(total), rate)
 			return
 		}
 		if step := int64(pct) / 10; step > lastStep {
 			lastStep = step
-			fmt.Fprintf(w, "%s: %3.0f%% (%s / %s) %s\n", label, pct, mixcloud.HumanBytes(sent), mixcloud.HumanBytes(total), rate)
+			fmt.Fprintf(w, "%s: %3.0f%% (%s / %s) %s\n", label, pct, media.HumanBytes(sent), media.HumanBytes(total), rate)
 		}
 	}
 }

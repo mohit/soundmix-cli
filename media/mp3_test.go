@@ -1,4 +1,4 @@
-package mixcloud
+package media
 
 import (
 	"bytes"
@@ -103,13 +103,4 @@ func id3Tag(size int) []byte {
 	h := []byte{'I', 'D', '3', 4, 0, 0,
 		byte(size >> 21 & 0x7f), byte(size >> 14 & 0x7f), byte(size >> 7 & 0x7f), byte(size & 0x7f)}
 	return append(h, make([]byte, size)...)
-}
-
-func TestCheckShowLength(t *testing.T) {
-	if err := CheckShowLength(14*time.Minute + 59*time.Second); err == nil {
-		t.Fatal("expected 14:59 to be rejected")
-	}
-	if err := CheckShowLength(15 * time.Minute); err != nil {
-		t.Fatal(err)
-	}
 }

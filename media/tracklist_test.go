@@ -1,4 +1,4 @@
-package mixcloud
+package media
 
 import (
 	"strings"

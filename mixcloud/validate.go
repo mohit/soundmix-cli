@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/mohit/soundmix-cli/media"
 )
 
 // Limits documented by Mixcloud for uploads. Sizes use binary units, which
@@ -57,7 +59,7 @@ func (r *UploadRequest) Validate(now time.Time) error {
 	if r.Audio == nil || r.Audio.Body == nil {
 		p.addf("audio file is required")
 	} else if r.Audio.Size > MaxAudioSize {
-		p.addf("audio file is %s; the limit is %s", HumanBytes(r.Audio.Size), HumanBytes(MaxAudioSize))
+		p.addf("audio file is %s; the limit is %s", media.HumanBytes(r.Audio.Size), media.HumanBytes(MaxAudioSize))
 	} else if r.Audio.Size == 0 {
 		p.addf("audio file is empty")
 	}
@@ -115,7 +117,7 @@ func validateCommon(p *problems, description string, picture *File, tags []strin
 		if picture.Body == nil {
 			p.addf("picture has no contents")
 		} else if picture.Size > MaxPictureSize {
-			p.addf("picture is %s; the limit is %s", HumanBytes(picture.Size), HumanBytes(MaxPictureSize))
+			p.addf("picture is %s; the limit is %s", media.HumanBytes(picture.Size), media.HumanBytes(MaxPictureSize))
 		}
 	}
 	if len(tags) > MaxTags {
@@ -147,7 +149,7 @@ func CheckShowLength(d time.Duration) error {
 	if d < MinShowLength {
 		return &ValidationError{Problems: []string{fmt.Sprintf(
 			"audio is %s long; Mixcloud shows must be at least %s",
-			FormatDuration(d), FormatDuration(MinShowLength))}}
+			media.FormatDuration(d), media.FormatDuration(MinShowLength))}}
 	}
 	return nil
 }
@@ -195,27 +197,4 @@ func (c *Client) Quota(ctx context.Context) (*UploadQuota, error) {
 		q.Limit = FreePublishedShowLimit
 	}
 	return q, nil
-}
-
-// HumanBytes formats a byte count using binary units (e.g. "4.0 GB").
-func HumanBytes(n int64) string {
-	const unit = 1024
-	if n < unit {
-		return fmt.Sprintf("%d B", n)
-	}
-	div, exp := int64(unit), 0
-	for m := n / unit; m >= unit; m /= unit {
-		div *= unit
-		exp++
-	}
-	return fmt.Sprintf("%.1f %cB", float64(n)/float64(div), "KMGTPE"[exp])
-}
-
-// FormatDuration formats d as H:MM:SS or M:SS.
-func FormatDuration(d time.Duration) string {
-	s := int64(d.Round(time.Second).Seconds())
-	if s >= 3600 {
-		return fmt.Sprintf("%d:%02d:%02d", s/3600, s%3600/60, s%60)
-	}
-	return fmt.Sprintf("%d:%02d", s/60, s%60)
 }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/mohit/soundmix-cli/media"
 	"github.com/mohit/soundmix-cli/mixcloud"
 )
 
@@ -65,7 +66,7 @@ match; any --exclude term removes a result).`,
 				fmt.Fprintln(tw, "KEY\tNAME\tBY\tLENGTH\tPLAYS")
 				for _, r := range results {
 					fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%d\n", r.Key, truncate(r.Name, 50), r.User.Username,
-						mixcloud.FormatDuration(r.Duration()), r.PlayCount)
+						media.FormatDuration(r.Duration()), r.PlayCount)
 				}
 			} else {
 				fmt.Fprintln(tw, "KEY\tNAME")

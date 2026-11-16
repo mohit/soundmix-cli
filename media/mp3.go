@@ -1,4 +1,4 @@
-package mixcloud
+package media
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 
 // ErrUnknownAudioFormat is returned by MP3Duration when the data is not a
 // recognisable MP3 stream.
-var ErrUnknownAudioFormat = errors.New("mixcloud: not a recognisable MP3 file")
+var ErrUnknownAudioFormat = errors.New("media: not a recognisable MP3 file")
 
 // MP3Duration works out the playing time of an MP3 without decoding it. It
 // reads the Xing/Info or VBRI header when present (VBR files and most
