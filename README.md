@@ -118,6 +118,13 @@ go vet ./... && go test -race ./...
 
 Design notes and verified API behaviour are in [`plans/`](plans/).
 
+## Authorship
+
+Maintained by [mohit](https://github.com/mohit), who directs, reviews and
+tests it. Most of the code was written with AI coding agents:
+[Claude Code](https://claude.com/claude-code) and
+[OpenAI Codex](https://openai.com/codex/).
+
 ## Licence
 
 Apache 2.0. See [LICENSE](LICENSE).
