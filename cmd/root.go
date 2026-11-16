@@ -1,4 +1,4 @@
-// Package cmd implements the mixcloud-cli command line.
+// Package cmd implements the soundmix-cli command line.
 package cmd
 
 import (
@@ -13,7 +13,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"mixcloud-cli/mixcloud"
+	"github.com/mohit/soundmix-cli/mixcloud"
 )
 
 // Exit codes, documented in AGENTS.md.
@@ -25,7 +25,7 @@ const (
 	exitRateLimited = 5
 )
 
-// Version is set at build time with -ldflags "-X mixcloud-cli/cmd.Version=...".
+// Version is set at build time with -ldflags "-X github.com/mohit/soundmix-cli/cmd.Version=...".
 var Version = "dev"
 
 type globalOptions struct {
@@ -65,14 +65,14 @@ func run(ctx context.Context, args []string, stdin io.Reader, stdout, stderr io.
 
 func newRootCmd(g *globalOptions) *cobra.Command {
 	root := &cobra.Command{
-		Use:   "mixcloud-cli",
+		Use:   "soundmix-cli",
 		Short: "Manage Mixcloud uploads from the command line",
-		Long: `mixcloud-cli uploads, edits, publishes and deletes shows on Mixcloud,
+		Long: `soundmix-cli uploads, edits, publishes and deletes shows on Mixcloud,
 and searches Mixcloud. It is designed to be driven by people and AI agents:
 every command accepts --json for machine-readable output.
 
 Credentials are read from the environment or a .env file (see .env.example).
-Run "mixcloud-cli auth login" once to get an access token.`,
+Run "soundmix-cli auth login" once to get an access token.`,
 		Version:       Version,
 		SilenceUsage:  true,
 		SilenceErrors: true,
@@ -106,11 +106,11 @@ func (g *globalOptions) client(needToken bool) (*mixcloud.Client, error) {
 		token = os.Getenv(envToken)
 	}
 	if needToken && token == "" {
-		return nil, authError{errors.New(`not logged in: run "mixcloud-cli auth login" or set ` + envToken)}
+		return nil, authError{errors.New(`not logged in: run "soundmix-cli auth login" or set ` + envToken)}
 	}
 	opts := []mixcloud.Option{
 		mixcloud.WithAccessToken(token),
-		mixcloud.WithUserAgent("mixcloud-cli/" + Version),
+		mixcloud.WithUserAgent("github.com/mohit/soundmix-cli/" + Version),
 		mixcloud.WithRateLimitRetry(2 * time.Minute),
 	}
 	if u := os.Getenv(envAPIURL); u != "" {

@@ -1,11 +1,11 @@
 # AGENTS.md
 
 Instructions for AI agents (and people) working **on** this repository and
-working **with** the `mixcloud-cli` tool. Design notes live in [`plans/`](plans/).
+working **with** the `soundmix-cli` tool. Design notes live in [`plans/`](plans/).
 
 ## What this is
 
-`mixcloud-cli` is a Go CLI and library for managing a Mixcloud account's
+`soundmix-cli` is a Go CLI and library for managing a Mixcloud account's
 uploads: upload shows, edit metadata/tracklists/cover art, publish,
 unpublish, unlist, delete, check the free-account quota, and search.
 
@@ -19,7 +19,7 @@ unpublish, unlist, delete, check the free-account quota, and search.
 ## Developing
 
 ```bash
-go build -o mixcloud-cli .
+go build -o soundmix-cli .
 go vet ./...
 gofmt -l .          # must print nothing
 go test -race ./...
@@ -41,7 +41,7 @@ go test -race ./...
 
 - Real credentials live only in `.env` (gitignored, mode 0600). `.env.example`
   is the committed template; keep it in sync when adding variables.
-- Never commit `.env` or `.mixcloud-uploads.json`, and never print, log or paste
+- Never commit `.env` or `.soundmix-uploads.json`, and never print, log or paste
   an access token or client secret. The client redacts `access_token`,
   `client_secret` and `code` from error messages; keep it that way. Note
   that the API's own `metadata=1` responses embed the token in URLs.
@@ -81,9 +81,9 @@ Mixcloud only supports **browser-based** authorization, so a human must
 approve access once:
 
 ```bash
-mixcloud-cli auth url --json         # give this URL to the account owner
-mixcloud-cli auth login --code CODE  # they paste back the code (or full redirect URL)
-mixcloud-cli auth status --json      # verify
+soundmix-cli auth url --json         # give this URL to the account owner
+soundmix-cli auth login --code CODE  # they paste back the code (or full redirect URL)
+soundmix-cli auth status --json      # verify
 ```
 
 The token is saved to `MIXCLOUD_ACCESS_TOKEN` in `.env`. Never ask for the
@@ -97,11 +97,11 @@ A show is identified by its key: `username/slug`, `/username/slug/` or a
 ### Uploading a show
 
 ```bash
-mixcloud-cli --json uploads quota
-mixcloud-cli --json uploads create mix.mp3 --name "Friday Mix" \
+soundmix-cli --json uploads quota
+soundmix-cli --json uploads create mix.mp3 --name "Friday Mix" \
   -t House -t Disco --picture cover.jpg --tracklist tracklist.txt \
   --description "Recorded live" --dry-run      # check first; nothing is sent
-mixcloud-cli --json uploads create mix.mp3 ...  # same flags, without --dry-run
+soundmix-cli --json uploads create mix.mp3 ...  # same flags, without --dry-run
 ```
 
 Pre-flight checks (run before any bytes are sent; failures exit 2):
@@ -138,14 +138,14 @@ Pass a file with `--tracklist FILE` (`-` for stdin) and/or single lines with
 ### Managing existing shows
 
 ```bash
-mixcloud-cli --json uploads list --include-private   # yours, incl. private/drafts known locally
-mixcloud-cli --json uploads get KEY                  # details + status
-mixcloud-cli --json uploads edit KEY --name "New name" --add-tag Techno --remove-tag Disco
-mixcloud-cli --json uploads edit KEY --tracklist new-tracklist.txt
-mixcloud-cli --json uploads publish KEY      # verifies it's actually public afterwards
-mixcloud-cli --json uploads unpublish KEY    # to drafts (not publicly reachable)
-mixcloud-cli --json uploads unlist KEY       # link-only
-mixcloud-cli --json uploads delete KEY --yes # permanent; needs --yes when non-interactive
+soundmix-cli --json uploads list --include-private   # yours, incl. private/drafts known locally
+soundmix-cli --json uploads get KEY                  # details + status
+soundmix-cli --json uploads edit KEY --name "New name" --add-tag Techno --remove-tag Disco
+soundmix-cli --json uploads edit KEY --tracklist new-tracklist.txt
+soundmix-cli --json uploads publish KEY      # verifies it's actually public afterwards
+soundmix-cli --json uploads unpublish KEY    # to drafts (not publicly reachable)
+soundmix-cli --json uploads unlist KEY       # link-only
+soundmix-cli --json uploads delete KEY --yes # permanent; needs --yes when non-interactive
 ```
 
 Gotchas, all verified against the live API:
@@ -154,7 +154,7 @@ Gotchas, all verified against the live API:
   `--host` replace every existing value. Use `--add-tag`/`--remove-tag` to
   keep the other tags. Omitted fields (name, description, picture) are kept.
 - **The API doesn't list private uploads or drafts.** The CLI records every
-  upload/visibility change it makes in `.mixcloud-uploads.json` (next to
+  upload/visibility change it makes in `.soundmix-uploads.json` (next to
   `.env`; override with `MIXCLOUD_LEDGER`), and `list --include-private`
   merges those in. Shows made elsewhere that are private can only be fetched
   by key.
@@ -171,8 +171,8 @@ Gotchas, all verified against the live API:
 ### Searching
 
 ```bash
-mixcloud-cli --json search "nick warren" --include 1995 --limit 10
-mixcloud-cli --json search techno --type user
+soundmix-cli --json search "nick warren" --include 1995 --limit 10
+soundmix-cli --json search techno --type user
 ```
 
 Not supported by Mixcloud's API: audio streaming/downloads, and listing

@@ -10,7 +10,7 @@ import (
 	"sort"
 	"time"
 
-	"mixcloud-cli/mixcloud"
+	"github.com/mohit/soundmix-cli/mixcloud"
 )
 
 // The ledger is a local record of uploads made by this CLI. It exists
@@ -46,7 +46,7 @@ func (g *globalOptions) ledgerPath() string {
 	if p := os.Getenv(envLedger); p != "" {
 		return p
 	}
-	return filepath.Join(filepath.Dir(g.envFile), ".mixcloud-uploads.json")
+	return filepath.Join(filepath.Dir(g.envFile), ".soundmix-uploads.json")
 }
 
 func (g *globalOptions) loadLedger() (*ledger, error) {

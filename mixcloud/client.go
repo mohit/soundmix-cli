@@ -21,7 +21,7 @@ const (
 	// DefaultOAuthURL is the root of the Mixcloud OAuth endpoints.
 	DefaultOAuthURL = "https://www.mixcloud.com/oauth/"
 
-	defaultUserAgent = "mixcloudclient-go/2"
+	defaultUserAgent = "soundmix-cli-go/2"
 	maxRetries       = 3
 )
 

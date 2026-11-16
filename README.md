@@ -1,7 +1,7 @@
-# mixcloud-cli
+# soundmix-cli
 
 A command-line tool and Go library for managing your [Mixcloud](https://www.mixcloud.com)
-uploads. You can upload shows, edit their details, tracklists and cover art,
+uploads. (An independent project, not made by or affiliated with Mixcloud.) You can upload shows, edit their details, tracklists and cover art,
 publish, unpublish, unlist and delete them, check your free-account quota,
 and search Mixcloud.
 
@@ -18,8 +18,14 @@ Based on [dreddick-home/mixcloudclient](https://github.com/dreddick-home/mixclou
 Requires Go 1.24+.
 
 ```bash
-git clone <this repository> mixcloud-cli && cd mixcloud-cli
-go build -o mixcloud-cli .
+go install github.com/mohit/soundmix-cli@latest
+```
+
+or from a checkout:
+
+```bash
+git clone https://github.com/mohit/soundmix-cli.git && cd soundmix-cli
+go build -o soundmix-cli .
 ```
 
 ## Set up
@@ -30,7 +36,7 @@ go build -o mixcloud-cli .
 3. Log in. Mixcloud only allows browser authorization:
 
    ```bash
-   ./mixcloud-cli auth login
+   ./soundmix-cli auth login
    ```
 
    Open the printed URL, approve, and paste the code that Mixcloud shows.
@@ -40,25 +46,25 @@ go build -o mixcloud-cli .
 ## Usage
 
 ```bash
-mixcloud-cli uploads quota
+soundmix-cli uploads quota
 # 0/10 free published shows used
 
-mixcloud-cli uploads create mix.mp3 --name "Friday Mix" \
+soundmix-cli uploads create mix.mp3 --name "Friday Mix" \
   -t House -t Disco --picture cover.jpg \
   --tracklist tracklist.txt --description "Recorded live" --dry-run
 
-mixcloud-cli uploads create mix.mp3 --name "Friday Mix" ...   # for real
-mixcloud-cli uploads list --include-private
-mixcloud-cli uploads get myname/friday-mix
-mixcloud-cli uploads edit myname/friday-mix --add-tag Techno --remove-tag Disco
-mixcloud-cli uploads unpublish myname/friday-mix
-mixcloud-cli uploads publish myname/friday-mix
-mixcloud-cli uploads delete myname/friday-mix
+soundmix-cli uploads create mix.mp3 --name "Friday Mix" ...   # for real
+soundmix-cli uploads list --include-private
+soundmix-cli uploads get myname/friday-mix
+soundmix-cli uploads edit myname/friday-mix --add-tag Techno --remove-tag Disco
+soundmix-cli uploads unpublish myname/friday-mix
+soundmix-cli uploads publish myname/friday-mix
+soundmix-cli uploads delete myname/friday-mix
 
-mixcloud-cli search "nick warren" --include 1995
+soundmix-cli search "nick warren" --include 1995
 ```
 
-Run `mixcloud-cli <command> --help` for every flag.
+Run `soundmix-cli <command> --help` for every flag.
 
 ### Tracklists
 
@@ -87,12 +93,14 @@ After a publish, the CLI confirms the show is actually public.
 ### Private shows
 
 Mixcloud's API doesn't list private uploads or drafts. The CLI keeps a local
-record of the shows it uploads (`.mixcloud-uploads.json`, gitignored), and
+record of the shows it uploads (`.soundmix-uploads.json`, gitignored), and
 `uploads list --include-private` uses it.
 
 ## Library
 
 ```go
+import "github.com/mohit/soundmix-cli/mixcloud"
+
 client, _ := mixcloud.New(mixcloud.WithAccessToken(token))
 f, _ := mixcloud.OpenFile("mix.mp3")
 defer f.Close()

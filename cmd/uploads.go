@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 
-	"mixcloud-cli/mixcloud"
+	"github.com/mohit/soundmix-cli/mixcloud"
 )
 
 func newUploadsCmd(g *globalOptions) *cobra.Command {
@@ -57,7 +57,7 @@ func newListCmd(g *globalOptions) *cobra.Command {
 
 Mixcloud's API only lists public shows, and a newly published show can take
 a while to appear. With --include-private, shows this CLI uploaded or changed
-(recorded in .mixcloud-uploads.json) are added and their current status is
+(recorded in .soundmix-uploads.json) are added and their current status is
 checked: public, unlisted (link only), draft or scheduled.`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -354,10 +354,10 @@ because the API only reports problems after the whole file has uploaded:
     <= 2 hosts; cover art <= 10 MiB
 
 Use --dry-run to run the checks without uploading.`,
-		Example: `  mixcloud-cli uploads create mix.mp3 --name "Friday Mix" -t House -t Disco \
+		Example: `  soundmix-cli uploads create mix.mp3 --name "Friday Mix" -t House -t Disco \
     --picture cover.jpg --tracklist tracklist.txt --description "Live from the shop"
 
-  mixcloud-cli uploads create show.mp3 -n "Test" --unlisted --dry-run --json`,
+  soundmix-cli uploads create show.mp3 -n "Test" --unlisted --dry-run --json`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
@@ -510,10 +510,10 @@ func newEditCmd(g *globalOptions) *cobra.Command {
 Tags, tracklist sections and hosts are replaced as a whole by Mixcloud:
 --tag, --tracklist/--section and --host each replace every existing value.
 Use --add-tag/--remove-tag to change tags while keeping the others.`,
-		Example: `  mixcloud-cli uploads edit myname/friday-mix --name "Friday Mix (Remastered)"
-  mixcloud-cli uploads edit myname/friday-mix --add-tag Techno --remove-tag Disco
-  mixcloud-cli uploads edit myname/friday-mix --tracklist tracklist.txt
-  mixcloud-cli uploads edit https://www.mixcloud.com/myname/friday-mix/ --publish`,
+		Example: `  soundmix-cli uploads edit myname/friday-mix --name "Friday Mix (Remastered)"
+  soundmix-cli uploads edit myname/friday-mix --add-tag Techno --remove-tag Disco
+  soundmix-cli uploads edit myname/friday-mix --tracklist tracklist.txt
+  soundmix-cli uploads edit https://www.mixcloud.com/myname/friday-mix/ --publish`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
@@ -746,7 +746,7 @@ func verifyPublished(ctx context.Context, client *mixcloud.Client, key string) e
 	}
 	return fmt.Errorf("mixcloud accepted the publish request but %s is still not public; "+
 		"Mixcloud silently keeps shows under 15 minutes private, and a recent upload may still be processing "+
-		"(check again with \"mixcloud-cli uploads get %s\")", key, key)
+		"(check again with \"soundmix-cli uploads get %s\")", key, key)
 }
 
 func checkQuota(ctx context.Context, g *globalOptions, client *mixcloud.Client) error {

@@ -21,8 +21,8 @@ jobs:
           for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64; do
             os=${target%/*}; arch=${target#*/}; ext=""; [ "$os" = windows ] && ext=.exe
             CGO_ENABLED=0 GOOS=$os GOARCH=$arch go build -trimpath \
-              -ldflags "-s -w -X mixcloud-cli/cmd.Version=${GITHUB_REF_NAME}" \
-              -o "dist/mixcloud-cli-${GITHUB_REF_NAME}-${os}-${arch}${ext}" .
+              -ldflags "-s -w -X github.com/mohit/soundmix-cli/cmd.Version=${GITHUB_REF_NAME}" \
+              -o "dist/soundmix-cli-${GITHUB_REF_NAME}-${os}-${arch}${ext}" .
           done
           (cd dist && sha256sum * > SHA256SUMS)
       - name: Create release

@@ -1,4 +1,4 @@
-module mixcloud-cli
+module github.com/mohit/soundmix-cli
 
 go 1.24.0
 

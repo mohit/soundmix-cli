@@ -4,10 +4,10 @@
 !.env.example
 
 # Build output
-/mixcloud-cli
+/soundmix-cli
 /dist/
 *.test
 coverage.out
 
 # Local record of uploads made by the CLI (may contain private show keys)
-.mixcloud-uploads.json
+.soundmix-uploads.json

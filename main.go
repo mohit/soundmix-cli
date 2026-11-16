@@ -1,7 +1,7 @@
-// Command mixcloud-cli manages Mixcloud uploads from the command line.
+// Command soundmix-cli manages Mixcloud uploads from the command line.
 package main
 
-import "mixcloud-cli/cmd"
+import "github.com/mohit/soundmix-cli/cmd"
 
 func main() {
 	cmd.Execute()

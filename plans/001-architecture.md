@@ -20,7 +20,7 @@ AI agents can drive reliably.
 
 | Area | Original | Now | Why |
 |---|---|---|---|
-| Name | `mixcloudclient` | `mixcloud-cli` (module, repo, binary); library package `mixcloud` | Go naming: lowercase, hyphenated repo/binary; package names are single lowercase words |
+| Name | `mixcloudclient` | `soundmix-cli` (repo, binary, module `github.com/mohit/soundmix-cli`); library package `mixcloud` | Go naming: lowercase, hyphenated repo/binary; package names are single lowercase words. The tool's own name doesn't use the Mixcloud brand; the package is named for the API it wraps |
 | Scope | search | uploads: create/edit/publish/unpublish/unlist/delete/list/get/quota + search | requested focus |
 | Auth | none | OAuth 2.0 (browser code flow), token in `.env` | required for every write and `/me/` |
 | Config | viper + `~/.mixcloudclient.yaml` | env vars + `.env` / `.env.example` | requested; fewer dependencies |
@@ -64,7 +64,7 @@ first and confirms anonymous reachability afterwards
 
 **Local upload record (ledger).** The API can't list private uploads or
 drafts, and listings lag behind publishes by minutes. The CLI records keys
-and the visibility it last set in `.mixcloud-uploads.json`. That file is used for:
+and the visibility it last set in `.soundmix-uploads.json`. That file is used for:
 `list --include-private`, accurate `status`, and a quota count that includes
 shows published but not yet counted. It's best-effort: failures to write it
 only warn, and shows managed outside the CLI are unknown to it.

@@ -14,7 +14,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"mixcloud-cli/mixcloud"
+	"github.com/mohit/soundmix-cli/mixcloud"
 )
 
 func newAuthCmd(g *globalOptions) *cobra.Command {
@@ -92,7 +92,7 @@ func newAuthLoginCmd(g *globalOptions) *cobra.Command {
 	c := &cobra.Command{
 		Use:   "login",
 		Short: "Authorize this app and save an access token to the .env file",
-		Long: `Authorize mixcloud-cli to act on a Mixcloud account.
+		Long: `Authorize soundmix-cli to act on a Mixcloud account.
 
 Mixcloud only supports browser-based authorization, so a person has to open
 a URL and approve access once. There are three ways to finish:
@@ -173,7 +173,7 @@ func obtainCode(ctx context.Context, g *globalOptions, client *mixcloud.Client, 
 		return waitForCallback(ctx, g, u, authURL)
 	}
 	if !isTerminal(g.stdin) {
-		return "", usagef("no --code given and stdin is not a terminal; run \"mixcloud-cli auth url\", open the URL, then pass the code with --code")
+		return "", usagef("no --code given and stdin is not a terminal; run \"soundmix-cli auth url\", open the URL, then pass the code with --code")
 	}
 	g.infof("Open this URL in a browser and approve access:\n\n  %s\n\n", authURL)
 	if cfg.RedirectURI == "" {
@@ -228,7 +228,7 @@ func waitForCallback(ctx context.Context, g *globalOptions, redirect *url.URL, a
 			http.Error(w, "Missing code", http.StatusBadRequest)
 			return
 		}
-		fmt.Fprintln(w, "mixcloud-cli is authorized. You can close this window.")
+		fmt.Fprintln(w, "soundmix-cli is authorized. You can close this window.")
 		select {
 		case ch <- result{code: code}:
 		default:
