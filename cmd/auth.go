@@ -170,10 +170,11 @@ The token is verified and then written to MIXCLOUD_ACCESS_TOKEN in the
 func obtainCode(ctx context.Context, g *globalOptions, client *mixcloud.Client, cfg mixcloud.OAuthConfig) (string, error) {
 	authURL := client.AuthorizeURL(cfg)
 	if u, err := url.Parse(cfg.RedirectURI); err == nil && isLoopback(u) {
-		return waitForCallback(ctx, g, u, authURL)
+		code, _, err := waitForCallback(ctx, g, u, authURL)
+		return code, err
 	}
 	if !isTerminal(g.stdin) {
-		return "", usagef("no --code given and stdin is not a terminal; run \"soundmix-cli auth url\", open the URL, then pass the code with --code")
+		return "", usagef("no --code given and stdin is not a terminal; run \"soundmix-cli mixcloud auth url\", open the URL, then pass the code with --code")
 	}
 	g.infof("Open this URL in a browser and approve access:\n\n  %s\n\n", authURL)
 	if cfg.RedirectURI == "" {
@@ -197,18 +198,18 @@ func isLoopback(u *url.URL) bool {
 	return h == "localhost" || h == "127.0.0.1" || h == "::1"
 }
 
-func waitForCallback(ctx context.Context, g *globalOptions, redirect *url.URL, authURL string) (string, error) {
+func waitForCallback(ctx context.Context, g *globalOptions, redirect *url.URL, authURL string) (code, state string, err error) {
 	addr := redirect.Host
 	if redirect.Port() == "" {
 		addr = net.JoinHostPort(redirect.Hostname(), "80")
 	}
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
-		return "", fmt.Errorf("listening on %s for the OAuth callback: %w", addr, err)
+		return "", "", fmt.Errorf("listening on %s for the OAuth callback: %w", addr, err)
 	}
 	type result struct {
-		code string
-		err  error
+		code, state string
+		err         error
 	}
 	ch := make(chan result, 1)
 	path := redirect.Path
@@ -230,7 +231,7 @@ func waitForCallback(ctx context.Context, g *globalOptions, redirect *url.URL, a
 		}
 		fmt.Fprintln(w, "soundmix-cli is authorized. You can close this window.")
 		select {
-		case ch <- result{code: code}:
+		case ch <- result{code: code, state: q.Get("state")}:
 		default:
 		}
 	})
@@ -243,10 +244,25 @@ func waitForCallback(ctx context.Context, g *globalOptions, redirect *url.URL, a
 	defer cancel()
 	select {
 	case r := <-ch:
-		return r.code, r.err
+		return r.code, r.state, r.err
 	case <-ctx.Done():
-		return "", errors.New("timed out waiting for authorization")
+		return "", "", errors.New("timed out waiting for authorization")
 	}
+}
+
+// extractCodeAndState accepts a bare code or a redirect URL containing
+// ?code=...&state=...; state is empty when only a code was given.
+func extractCodeAndState(s string) (code, state string) {
+	s = strings.TrimSpace(s)
+	if strings.Contains(s, "code=") {
+		if u, err := url.Parse(s); err == nil && u.Query().Get("code") != "" {
+			return u.Query().Get("code"), u.Query().Get("state")
+		}
+		if q, err := url.ParseQuery(s); err == nil && q.Get("code") != "" {
+			return q.Get("code"), q.Get("state")
+		}
+	}
+	return s, ""
 }
 
 // extractCode accepts a bare code or a redirect URL containing ?code=.

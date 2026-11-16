@@ -67,12 +67,12 @@ func newRootCmd(g *globalOptions) *cobra.Command {
 	root := &cobra.Command{
 		Use:   "soundmix-cli",
 		Short: "Manage Mixcloud uploads from the command line",
-		Long: `soundmix-cli uploads, edits, publishes and deletes shows on Mixcloud,
+		Long: `soundmix-cli mixcloud uploads, edits, publishes and deletes shows on Mixcloud,
 and searches Mixcloud. It is designed to be driven by people and AI agents:
 every command accepts --json for machine-readable output.
 
 Credentials are read from the environment or a .env file (see .env.example).
-Run "soundmix-cli auth login" once to get an access token.`,
+Run "soundmix-cli mixcloud auth login" once to get an access token.`,
 		Version:       Version,
 		SilenceUsage:  true,
 		SilenceErrors: true,
@@ -106,7 +106,7 @@ func (g *globalOptions) client(needToken bool) (*mixcloud.Client, error) {
 		token = os.Getenv(envToken)
 	}
 	if needToken && token == "" {
-		return nil, authError{errors.New(`not logged in: run "soundmix-cli auth login" or set ` + envToken)}
+		return nil, authError{errors.New(`not logged in: run "soundmix-cli mixcloud auth login" or set ` + envToken)}
 	}
 	opts := []mixcloud.Option{
 		mixcloud.WithAccessToken(token),

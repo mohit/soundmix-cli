@@ -295,9 +295,15 @@ func (m *metadataFlags) readDescription(stdin io.Reader) (string, bool, error) {
 }
 
 func (m *metadataFlags) readSections(stdin io.Reader) ([]media.Section, error) {
+	return readSections(m.tracklist, m.sections, stdin)
+}
+
+// readSections parses a tracklist file ("-" for stdin) plus individual
+// --section lines, sorted by start time.
+func readSections(tracklist string, lines []string, stdin io.Reader) ([]media.Section, error) {
 	var out []media.Section
-	if m.tracklist != "" {
-		data, err := readFileOrStdin(m.tracklist, stdin)
+	if tracklist != "" {
+		data, err := readFileOrStdin(tracklist, stdin)
 		if err != nil {
 			return nil, err
 		}
@@ -307,7 +313,7 @@ func (m *metadataFlags) readSections(stdin io.Reader) ([]media.Section, error) {
 		}
 		out = append(out, secs...)
 	}
-	for _, line := range m.sections {
+	for _, line := range lines {
 		s, err := media.ParseSection(line)
 		if err != nil {
 			return nil, usageError{fmt.Errorf("--section: %w", err)}
@@ -353,10 +359,10 @@ because the API only reports problems after the whole file has uploaded:
     <= 2 hosts; cover art <= 10 MiB
 
 Use --dry-run to run the checks without uploading.`,
-		Example: `  soundmix-cli uploads create mix.mp3 --name "Friday Mix" -t House -t Disco \
+		Example: `  soundmix-cli mixcloud uploads create mix.mp3 --name "Friday Mix" -t House -t Disco \
     --picture cover.jpg --tracklist tracklist.txt --description "Live from the shop"
 
-  soundmix-cli uploads create show.mp3 -n "Test" --unlisted --dry-run --json`,
+  soundmix-cli mixcloud uploads create show.mp3 -n "Test" --unlisted --dry-run --json`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
@@ -509,10 +515,10 @@ func newEditCmd(g *globalOptions) *cobra.Command {
 Tags, tracklist sections and hosts are replaced as a whole by Mixcloud:
 --tag, --tracklist/--section and --host each replace every existing value.
 Use --add-tag/--remove-tag to change tags while keeping the others.`,
-		Example: `  soundmix-cli uploads edit myname/friday-mix --name "Friday Mix (Remastered)"
-  soundmix-cli uploads edit myname/friday-mix --add-tag Techno --remove-tag Disco
-  soundmix-cli uploads edit myname/friday-mix --tracklist tracklist.txt
-  soundmix-cli uploads edit https://www.mixcloud.com/myname/friday-mix/ --publish`,
+		Example: `  soundmix-cli mixcloud uploads edit myname/friday-mix --name "Friday Mix (Remastered)"
+  soundmix-cli mixcloud uploads edit myname/friday-mix --add-tag Techno --remove-tag Disco
+  soundmix-cli mixcloud uploads edit myname/friday-mix --tracklist tracklist.txt
+  soundmix-cli mixcloud uploads edit https://www.mixcloud.com/myname/friday-mix/ --publish`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
@@ -745,7 +751,7 @@ func verifyPublished(ctx context.Context, client *mixcloud.Client, key string) e
 	}
 	return fmt.Errorf("mixcloud accepted the publish request but %s is still not public; "+
 		"Mixcloud silently keeps shows under 15 minutes private, and a recent upload may still be processing "+
-		"(check again with \"soundmix-cli uploads get %s\")", key, key)
+		"(check again with \"soundmix-cli mixcloud uploads get %s\")", key, key)
 }
 
 func checkQuota(ctx context.Context, g *globalOptions, client *mixcloud.Client) error {

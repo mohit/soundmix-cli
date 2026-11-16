@@ -23,8 +23,8 @@ func newSearchCmd(g *globalOptions) *cobra.Command {
 		Long: `Search Mixcloud. --include and --exclude filter results on the client side
 by case-insensitive match against the name and key (all --include terms must
 match; any --exclude term removes a result).`,
-		Example: `  soundmix-cli search "nick warren" --include 1995
-  soundmix-cli search techno --type user --limit 10 --json`,
+		Example: `  soundmix-cli mixcloud search "nick warren" --include 1995
+  soundmix-cli mixcloud search techno --type user --limit 10 --json`,
 		Args: cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			st := mixcloud.SearchType(typ)
