@@ -11,7 +11,8 @@ AI agents can drive reliably.
 
 ## What was kept from the original
 
-- Go + cobra CLI; Apache-2.0 licence.
+- Go + cobra CLI. (The licence changed from Apache-2.0 to MIT; no code
+  from the original is reused.)
 - `search` with client-side include/exclude filters. It now pages by the
   API's `paging.next` links instead of guessing offsets, and filters on name
   and key case-insensitively.

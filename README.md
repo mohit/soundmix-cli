@@ -10,8 +10,9 @@ It is built to be driven by people **and AI agents**. Every command takes
 checked against Mixcloud's rules *before* any audio is sent. See
 [AGENTS.md](AGENTS.md) for the full agent guide.
 
-Based on [dreddick-home/mixcloudclient](https://github.com/dreddick-home/mixcloudclient)
-(Apache-2.0), rewritten for the current Mixcloud API.
+Inspired by [dreddick-home/mixcloudclient](https://github.com/dreddick-home/mixcloudclient),
+a 2020 Mixcloud search CLI. This is a ground-up rewrite for the current Mixcloud
+API and reuses none of its code.
 
 ## Install
 
@@ -127,4 +128,4 @@ tests it. Most of the code was written with AI coding agents:
 
 ## Licence
 
-Apache 2.0. See [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
